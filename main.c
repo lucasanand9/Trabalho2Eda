@@ -11,7 +11,6 @@ int main(){
         printf("Pessoa %i\n", sizeof(Pessoa));//remover
         printf("RefMovel %i\n", sizeof(RefMovel));//remover
 
-
         printf("Digite uma opção: \n");
         printf("(1)Adicionar elemento na fila\n");
         printf("(2)Remover elemento na fila\n");
@@ -40,17 +39,26 @@ int main(){
         case 2:
             Pessoa *pe = remover(filaRM);
             //ver o print que esta errado
+            if(pe == NULL){
+                printf("A Fila esta vazia!\n");
+                continue;
+            }
             printf("Nome: %s\nCurso: %s\nMatricula: %i\nRanking: %i\n", pe->nome,pe->curso, pe->matricula, pe->ranking);
         break;
 
         case 3:
-            buscaFrente(filaRM, &p);
-            printf("Nome: %s\nCurso: %s\nMatricula: %i\nRanking: %i\n", p.nome,p.curso, p.matricula, p.ranking);
+            if(buscaFrente(filaRM, &p)){
+                printf("Nome: %s\nCurso: %s\nMatricula: %i\nRanking: %i\n", p.nome,p.curso, p.matricula, p.ranking);    
+            }else{
+                printf("A Fila esta vazia!\n");
+            }
         break;
-
         case 4: 
-            buscaCauda(filaRM, &p);
-            printf("Nome: %s\nCurso: %s\nMatricula: %i\nRanking: %i\n", *p.nome,*p.curso, p.matricula, p.ranking);    
+            if(buscaCauda(filaRM, &p)){
+                printf("Nome: %s\nCurso: %s\nMatricula: %i\nRanking: %i\n", p.nome,p.curso, p.matricula, p.ranking);    
+            }else{
+                printf("A Fila esta vazia!\n");
+            }
         break;
 
         case 5:
@@ -66,6 +74,8 @@ int main(){
         break;
 
         case 0:
+            filaRM = destroi(filaRM);
+            free(filaRM);
             return 0;
         break;
 
