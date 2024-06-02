@@ -1,9 +1,10 @@
 #include "FilaDePrioridadeRefMovel.h"
-#include "FilaDePrioridade.h"
-#include "Pessoa.h"
+// #include "Pessoa.h"
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+
+Pessoa* lerCSV(const char* nomeArquivo, int quantidade);
 
 int main(int argc, char *argv[]){
     RefMovel *filaRM = cria();
@@ -28,7 +29,7 @@ int main(int argc, char *argv[]){
 
         switch (index){
         case 1:
-        long interacao = 0;
+        long int interacao = 0;
         //arrumar essa leitura de pessoa
             printf("Digite o nome da pessoa:\n");
             scanf(" %[^\n]", p.nome);
@@ -39,7 +40,7 @@ int main(int argc, char *argv[]){
             printf("Digite o ranking:\n");
             scanf(" %i", &(p.ranking));
             insere(&p, filaRM, &interacao);
-            printf("Numero de interação: %l\n",interacao);
+            printf("Numero de interação: %li\n",interacao);
         break;
 
         case 2:
@@ -83,20 +84,22 @@ int main(int argc, char *argv[]){
             printf("Testando as diferenças entre as filas!");
             
             int numDados[18] = {500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000};
-            struct descF *filaPrioritaria = criar(sizeof(struct Pessoa));
+            // struct descF *filaPrioritaria = criar(sizeof(struct Pessoa));
             RefMovel *filaComRefMovel = cria();
+            SemRefMovel *filaSemRefMovel = criaSemRef();
 
-            for (int i = 0; i < 18; i++){
-                long numRepA = 0;
-                long numRepB = 0;
+            for (int i = 0; i < 18; i++){//i<18
+                long int numRepA = 0;
+                long int numRepB = 0;
                 struct Pessoa *p = lerCSV(argv[1],numDados[i]);
                 for (int j = 0; j < numDados[i]; j++){
+                    //printf("Nome: %s - Matricula: %i - Ranking: %i - Curso: %s\n", p[j].nome, p[j].matricula, p[j].ranking,p[j].curso);//remover
                     insere(&(p[j]),filaComRefMovel, &numRepA);//fila com refMovel
-                    inserir(&(p[j]), filaPrioritaria, &numRepB);//fila sem refMovel
+                    insereSemRef(&(p[j]), filaSemRefMovel,&numRepB);//fila sem refMovel
                 }
-                printf("Media com %i dados:\nCom refMovel: %l\nSem refMovel: %l\n", numDados[i], numRepA/numDados[i], numRepB/numDados[i]);
+                printf("Media com %i dados:\nCom refMovel: %ld\nSem refMovel: %d\n", numDados[i], numRepA, numRepB);
                 reinicia(filaComRefMovel);
-                reiniciar(filaPrioritaria);
+                reiniciaSemRefMovel(filaSemRefMovel);
             }
             
         break;
@@ -114,8 +117,8 @@ int main(int argc, char *argv[]){
     }
 }
 
-
-struct Pessoa* lerCSV(const char* nomeArquivo, int quantidade) {
+//LEITURA ARQUIVO CSV
+Pessoa* lerCSV(const char* nomeArquivo, int quantidade) {
     FILE* arquivo = fopen(nomeArquivo, "r");
     if (!arquivo) {
         perror("Erro ao abrir o arquivo");
