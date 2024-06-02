@@ -1,14 +1,17 @@
 #include "FilaDePrioridadeRefMovel.h"
+#include "FilaDePrioridade.h"
+#include "Pessoa.h"
 #include <stdio.h>
-#include<stdlib.h>
+#include <stdlib.h>
+#include <time.h>
 
-int main(){
+int main(int argc, char *argv[]){
     RefMovel *filaRM = cria();
-    Pessoa p;
+    struct Pessoa p;
     int index = 1;
     while (index != 0){
         printf("NoFila %i\n", sizeof(NoFila));//remover
-        printf("Pessoa %i\n", sizeof(Pessoa));//remover
+        printf("Pessoa %i\n", sizeof(struct Pessoa));//remover
         printf("RefMovel %i\n", sizeof(RefMovel));//remover
 
         printf("Digite uma opção: \n");
@@ -19,11 +22,13 @@ int main(){
         printf("(5)Ver o tamanho da fila\n");
         printf("(6)Reiniciar a fila\n");
         printf("(7)Destroi fila\n");
+        printf("(8)Testar diferença\n");
         printf("(0)Sair\n");
         scanf("%i", &index);
 
         switch (index){
         case 1:
+        long interacao = 0;
         //arrumar essa leitura de pessoa
             printf("Digite o nome da pessoa:\n");
             scanf(" %[^\n]", p.nome);
@@ -33,11 +38,12 @@ int main(){
             scanf(" %i", &(p.matricula));
             printf("Digite o ranking:\n");
             scanf(" %i", &(p.ranking));
-            insere(&p, filaRM);
+            insere(&p, filaRM, &interacao);
+            printf("Numero de interação: %l\n",interacao);
         break;
 
         case 2:
-            Pessoa *pe = remover(filaRM);
+            struct Pessoa *pe = remover(filaRM);
             //ver o print que esta errado
             if(pe == NULL){
                 printf("A Fila esta vazia!\n");
@@ -73,6 +79,28 @@ int main(){
             filaRM = destroi(filaRM);
         break;
 
+        case 8:
+            printf("Testando as diferenças entre as filas!");
+            
+            int numDados[18] = {500, 1000, 1500, 2000, 2500, 3000, 3500, 4000, 4500, 5000, 5500, 6000, 6500, 7000, 7500, 8000, 8500, 9000};
+            struct descF *filaPrioritaria = criar(sizeof(struct Pessoa));
+            RefMovel *filaComRefMovel = cria();
+
+            for (int i = 0; i < 18; i++){
+                long numRepA = 0;
+                long numRepB = 0;
+                struct Pessoa *p = lerCSV(argv[1],numDados[i]);
+                for (int j = 0; j < numDados[i]; j++){
+                    insere(&(p[j]),filaComRefMovel, &numRepA);//fila com refMovel
+                    inserir(&(p[j]), filaPrioritaria, &numRepB);//fila sem refMovel
+                }
+                printf("Media com %i dados:\nCom refMovel: %l\nSem refMovel: %l\n", numDados[i], numRepA/numDados[i], numRepB/numDados[i]);
+                reinicia(filaComRefMovel);
+                reiniciar(filaPrioritaria);
+            }
+            
+        break;
+
         case 0:
             filaRM = destroi(filaRM);
             free(filaRM);
@@ -84,4 +112,70 @@ int main(){
             break;
         }
     }
+}
+
+
+struct Pessoa* lerCSV(const char* nomeArquivo, int quantidade) {
+    FILE* arquivo = fopen(nomeArquivo, "r");
+    if (!arquivo) {
+        perror("Erro ao abrir o arquivo");
+        return NULL;
+    }
+
+    int totalLinhas = 10000;
+    if (quantidade > totalLinhas) {
+        quantidade = totalLinhas;
+    }
+
+    int* linhasSelecionadas = malloc(quantidade * sizeof(int));
+    if (!linhasSelecionadas) {
+        perror("Erro ao alocar memória");
+        fclose(arquivo);
+        return NULL;
+    }
+
+    // Inicializa gerador de números aleatórios
+    srand(time(NULL));
+
+    // Seleciona linhas aleatórias
+    for (int i = 0; i < quantidade; i++) {
+        linhasSelecionadas[i] = rand() % totalLinhas;
+        for (int j = 0; j < i; j++) {
+            if (linhasSelecionadas[i] == linhasSelecionadas[j]) {
+                i--; // Evita duplicação
+                break;
+            }
+        }
+    }
+
+    struct Pessoa* pessoas = malloc(quantidade * sizeof(struct Pessoa));
+    if (!pessoas) {
+        perror("Erro ao alocar memória");
+        free(linhasSelecionadas);
+        fclose(arquivo);
+        return NULL;
+    }
+
+    char linha[256];
+    int contador = 0;
+    int linhaAtual = 0;
+
+    // Lê o arquivo e armazena as linhas selecionadas
+    while (fgets(linha, sizeof(linha), arquivo)) {
+        for (int i = 0; i < quantidade; i++) {
+            if (linhaAtual == linhasSelecionadas[i]) {
+                struct Pessoa p;
+                sscanf(linha, "%49[^,],%d,%d,%49[^\n]", p.nome, &p.matricula, &p.ranking, p.curso);
+                pessoas[contador] = p;
+                contador++;
+                break;
+            }
+        }
+        linhaAtual++;
+    }
+
+    fclose(arquivo);
+    free(linhasSelecionadas);
+
+    return pessoas;
 }

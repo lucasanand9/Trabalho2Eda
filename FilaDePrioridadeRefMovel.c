@@ -1,4 +1,5 @@
 #include "FilaDePrioridadeRefMovel.h"
+#include "Pessoa.h"
 
 RefMovel *cria(){
     RefMovel *desc = (RefMovel*) malloc(sizeof(RefMovel));
@@ -11,13 +12,18 @@ RefMovel *cria(){
     return desc;
 }
 
-int insere(Pessoa *pessoa, RefMovel *fila){
+int insere(struct Pessoa *pessoa, RefMovel *fila, long *cont){
+    long mediaInt = 1;
+    if(cont == NULL){
+        printf("Insira um contador valido!");
+        return 0;
+    }
     printf("entrando na insere\n");//remover
     NoFila *visita = NULL;
     NoFila *novoNo;
     if((novoNo = (NoFila*) malloc(sizeof(NoFila))) != NULL){
         printf("primeiro if\n");//remover
-        memcpy(&(novoNo->pessoa), pessoa, sizeof(Pessoa));
+        memcpy(&(novoNo->pessoa), pessoa, sizeof(struct Pessoa));
     
         if(testaVazia(fila)){
             printf("vazia\n");//remover
@@ -28,7 +34,6 @@ int insere(Pessoa *pessoa, RefMovel *fila){
             //insere na cauda
             if (novoNo->pessoa.ranking < fila->cauda->pessoa.ranking){
             printf("insere na cauda\n");//remover
-
             novoNo->maior = fila->cauda;
             novoNo->menor = NULL;
             fila->cauda->menor = novoNo;
@@ -51,6 +56,7 @@ int insere(Pessoa *pessoa, RefMovel *fila){
                     visita = fila->cauda;
                     while (visita != fila->referencial && (visita->pessoa.ranking <= novoNo->pessoa.ranking)){
                         visita = visita->maior;
+                        mediaInt++;
                     }
 
                     if(visita->pessoa.ranking > novoNo->pessoa.ranking){
@@ -66,6 +72,7 @@ int insere(Pessoa *pessoa, RefMovel *fila){
                     visita = fila->referencial;
                     while ((visita != NULL) && (visita->pessoa.ranking >= novoNo->pessoa.ranking)){
                         visita= visita->menor;
+                        mediaInt++;
                     }
                     if(visita->pessoa.ranking < novoNo->pessoa.ranking){
                         printf("inserindo ref->cauda\n");//remover
@@ -87,6 +94,7 @@ int insere(Pessoa *pessoa, RefMovel *fila){
                         visita = fila->frente;
                         while ((visita != fila->referencial) && visita->pessoa.ranking >= novoNo->pessoa.ranking){
                             visita = visita->menor;
+                            mediaInt++;
                         }
                         if(visita->pessoa.ranking < novoNo->pessoa.ranking){
                             printf("frente da fila para o referencia\n");//remover
@@ -103,6 +111,7 @@ int insere(Pessoa *pessoa, RefMovel *fila){
                         visita = fila->referencial;
                         while ((visita != fila->frente) && (visita->pessoa.ranking <= novoNo->pessoa.ranking)){
                             visita = visita->maior;
+                            mediaInt++;
                         }
                         if(visita->pessoa.ranking > novoNo->pessoa.ranking){
                             printf("referencia para a frente da fila\n");//remover
@@ -116,6 +125,7 @@ int insere(Pessoa *pessoa, RefMovel *fila){
 
                 }        
             }
+            (*cont) += mediaInt;
             fila->tam += 1;
             return 1;
     }
@@ -126,14 +136,14 @@ int testaVazia(RefMovel *desc){
     return (desc->frente == NULL) && (desc ->cauda == NULL);
 }
 
-Pessoa * remover(RefMovel *desc){
+struct Pessoa * remover(RefMovel *desc){
     NoFila *aux = desc->cauda;
     if(testaVazia(desc)){
-        Pessoa *p = NULL;
+        struct Pessoa *p = NULL;
         return p;
     }
-    Pessoa *temp;
-    memcpy(temp, &(desc->frente->pessoa), sizeof(Pessoa));  
+   struct Pessoa *temp = ( struct Pessoa*) malloc(sizeof(struct Pessoa));
+    memcpy(temp, &(desc->frente->pessoa), sizeof(struct Pessoa));  
     if(aux == desc->frente){
         free(desc->frente);
         desc->frente = desc->cauda = desc->referencial = NULL;
@@ -150,7 +160,7 @@ int tamanhoFila(RefMovel *fila){
     return fila->tam;
 }
 
-int buscaCauda(RefMovel *fila, Pessoa *pessoa){
+int buscaCauda(RefMovel *fila, struct Pessoa *pessoa){
     if(testaVazia(fila)){
         return 0;
     }
@@ -158,7 +168,7 @@ int buscaCauda(RefMovel *fila, Pessoa *pessoa){
     return 1;
 }
 
-int buscaFrente(RefMovel *fila, Pessoa *pessoa){
+int buscaFrente(RefMovel *fila, struct Pessoa *pessoa){
     if(testaVazia(fila)){
         return 0;
     }
